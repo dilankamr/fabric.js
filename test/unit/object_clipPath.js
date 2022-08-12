@@ -61,6 +61,8 @@
     });
     expected.clipPath = expectedClipPath;
     assert.deepEqual(expected, cObj.toObject());
+    cObj.clipPath.excludeFromExport = true;
+    assert.ok(cObj.toObject().clipPath === undefined);
   });
 
   QUnit.test('from object with clipPath', function(assert) {
@@ -68,7 +70,7 @@
     var rect = new fabric.Rect({ width: 100, height: 100 });
     rect.clipPath = new fabric.Circle({ radius: 50 });
     var toObject = rect.toObject();
-    fabric.Rect.fromObject(toObject, function(rect) {
+    fabric.Rect.fromObject(toObject).then(function(rect) {
       assert.ok(rect.clipPath instanceof fabric.Circle, 'clipPath is enlived');
       assert.equal(rect.clipPath.radius, 50, 'radius is restored correctly');
       done();
@@ -80,7 +82,7 @@
     var rect = new fabric.Rect({ width: 100, height: 100 });
     rect.clipPath = new fabric.Circle({ radius: 50, inverted: true, absolutePositioned: true });
     var toObject = rect.toObject();
-    fabric.Rect.fromObject(toObject, function(rect) {
+    fabric.Rect.fromObject(toObject).then(function(rect) {
       assert.ok(rect.clipPath instanceof fabric.Circle, 'clipPath is enlived');
       assert.equal(rect.clipPath.radius, 50, 'radius is restored correctly');
       assert.equal(rect.clipPath.inverted, true, 'inverted is restored correctly');
@@ -95,7 +97,7 @@
     rect.clipPath = new fabric.Circle({ radius: 50 });
     rect.clipPath.clipPath = new fabric.Text('clipPath');
     var toObject = rect.toObject();
-    fabric.Rect.fromObject(toObject, function(rect) {
+    fabric.Rect.fromObject(toObject).then(function(rect) {
       assert.ok(rect.clipPath instanceof fabric.Circle, 'clipPath is enlived');
       assert.equal(rect.clipPath.radius, 50, 'radius is restored correctly');
       assert.ok(rect.clipPath.clipPath instanceof fabric.Text, 'nested clipPath is enlived');
@@ -110,7 +112,7 @@
     rect.clipPath = new fabric.Circle({ radius: 50 });
     rect.clipPath.clipPath = new fabric.Text('clipPath', { inverted: true, absolutePositioned: true});
     var toObject = rect.toObject();
-    fabric.Rect.fromObject(toObject, function(rect) {
+    fabric.Rect.fromObject(toObject).then(function(rect) {
       assert.ok(rect.clipPath instanceof fabric.Circle, 'clipPath is enlived');
       assert.equal(rect.clipPath.radius, 50, 'radius is restored correctly');
       assert.ok(rect.clipPath.clipPath instanceof fabric.Text, 'neted clipPath is enlived');

@@ -39,13 +39,13 @@
     assert.deepEqual(infos[2].length, 1, 'the command 2 a L with one step on Y has a length 1');
     assert.deepEqual(infos[3].length, 3, 'the command 3 a L with 3 step on X has a length 3');
     assert.deepEqual(infos[4].length, 2, 'the command 4 a L with 2 step on X has a length 0');
-    assert.deepEqual(infos[5].length, 2.061820497903685, 'the command 5 a C has a approximated length of 2.061');
-    assert.deepEqual(infos[6].length, 2.786311794934689, 'the command 6 a C has a approximated length of 2.786');
-    assert.deepEqual(infos[7].length, 4.123555017527272, 'the command 7 a C has a approximated length of 4.123');
+    assert.deepEqual(infos[5].length, 2.0624154987440195, 'the command 5 a C has a approximated length of 2.062');
+    assert.deepEqual(infos[6].length, 2.8283160519570405, 'the command 6 a C has a approximated length of 2.786');
+    assert.deepEqual(infos[7].length, 4.189704539256451, 'the command 7 a C has a approximated length of 4.123');
     assert.deepEqual(infos[8].length, 1, 'the command 8 a L with 1 step on the Y has an exact length of 1');
-    assert.deepEqual(infos[9].length, 3.1338167707969693, 'the command 9 a C has a approximated length of 3.183');
-    assert.deepEqual(infos[10].length, 1.512191042774622, 'the command 10 a Q has a approximated length of 1.512');
-    assert.deepEqual(infos[11].length, 2.2674203737413428, 'the command 11 a Q has a approximated length of 2.267');
+    assert.deepEqual(infos[9].length, 3.2272695880364677, 'the command 9 a C has a approximated length of 3.183');
+    assert.deepEqual(infos[10].length, 1.5402632710438555, 'the command 10 a Q has a approximated length of 1.512');
+    assert.deepEqual(infos[11].length, 2.295563578960362, 'the command 11 a Q has a approximated length of 2.267');
   });
 
   QUnit.test('fabric.util.getPathSegmentsInfo test Z command', function(assert) {
@@ -57,5 +57,33 @@
     assert.deepEqual(infos[2].length, 20, 'the command 2 a L has length 20');
     assert.deepEqual(infos[3].length, 20, 'the command 3 a L has length 20');
     assert.deepEqual(infos[4].length, 20, 'the command 4 a Z has length 20');
+  });
+
+  QUnit.test('fabric.util.getRegularPolygonPath', function (assert) {
+    assert.ok(typeof fabric.util.getRegularPolygonPath === 'function');
+    var penta = fabric.util.getRegularPolygonPath(5, 50);
+    var hexa = fabric.util.getRegularPolygonPath(6, 50);
+
+    var expetedPenta = [
+      ["M", 3.061616997868383e-15, -50],
+      ["L", 47.552825814757675, -15.450849718747369],
+      ["L", 29.389262614623657, 40.45084971874737],
+      ["L", -29.38926261462365, 40.45084971874737],
+      ["L", -47.55282581475768, -15.450849718747364],
+      ["Z"]
+    ];
+
+    var expetedHexa = [
+      ["M", 24.999999999999993, -43.30127018922194],
+      ["L", 50, -1.1102230246251565e-14],
+      ["L", 25.000000000000018, 43.301270189221924],
+      ["L", -24.99999999999999, 43.30127018922194],
+      ["L", -50, 2.8327694488239898e-14],
+      ["L", -25.00000000000006, -43.301270189221896],
+      ["Z"]
+    ];
+
+    assert.deepEqual(penta, expetedPenta, 'regualr pentagon should match');
+    assert.deepEqual(hexa, expetedHexa, 'regualr hexagon should match');
   });
 })();

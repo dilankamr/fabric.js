@@ -4,6 +4,7 @@ QUnit.test('fabric.Observable exists', function(assert) {
   assert.ok(fabric.Observable);
   assert.ok(fabric.Observable.fire);
   assert.ok(fabric.Observable.on);
+  assert.ok(fabric.Observable.once);
   assert.ok(fabric.Observable.off);
 });
 
@@ -18,6 +19,59 @@ QUnit.test('fire + on', function(assert) {
 
   foo.fire('bar:baz');
   assert.equal(eventFired, true);
+});
+
+QUnit.test('fire once', function (assert) {
+  var foo = {};
+  fabric.util.object.extend(foo, fabric.Observable);
+
+  var eventFired = 0;
+  foo.once('bar:baz', function () {
+    assert.equal(this, foo);
+    eventFired++;
+  });
+
+  foo.fire('bar:baz');
+  assert.equal(eventFired, 1);
+  foo.fire('bar:baz');
+  assert.equal(eventFired, 1);
+});
+
+QUnit.test('fire once multiple handlers', function (assert) {
+  var foo = {};
+  fabric.util.object.extend(foo, fabric.Observable);
+  var eventFired = 0;
+  var eventFired2 = 0;
+  var eventFired3 = 0;
+  var eventData = { a: 'b', c: 'd' };
+  foo.once({
+    'bar:baz': function () {
+      eventFired++;
+      assert.equal(this, foo);
+    },
+    'blah:blah': function () {
+      eventFired2++;
+      assert.equal(this, foo);
+    },
+    'blah:blah:bloo': function (e) {
+      eventFired3++;
+      assert.equal(this, foo);
+      assert.deepEqual(arguments[0], eventData);
+      assert.equal(e, eventData);
+    }
+  });
+  foo.fire('bar:baz');
+  assert.equal(eventFired, 1);
+  assert.equal(eventFired2, 0);
+  foo.fire('blah:blah');
+  assert.equal(eventFired, 1);
+  assert.equal(eventFired2, 1);
+  foo.fire('bar:baz');
+  foo.fire('blah:blah');
+  assert.equal(eventFired, 1);
+  assert.equal(eventFired2, 1);
+  assert.equal(eventFired3, 0);
+  foo.fire('blah:blah:bloo', eventData);
 });
 
 QUnit.test('off', function(assert) {
@@ -272,30 +326,59 @@ QUnit.test('adding events', function(assert) {
 });
 
 
-QUnit.test('chaining', function(assert) {
+QUnit.test('disposing', function(assert) {
   var foo = { };
   fabric.util.object.extend(foo, fabric.Observable);
 
-  var event1Fired = false, event2Fired = false;
-  foo
-    .on('event1', function() {
-      event1Fired = true;
-    })
-    .on('event2', function() {
-      event2Fired = true;
+  var fired = new Array(7).fill(false);
+  var getEventName = function (index) {
+    return `event${index + 1}`;
+  }
+  var createHandler = function (index) {
+    return function () {
+      fired[index] = true;
+    }
+  }
+  var attach = function () {
+    return [
+      foo.on(getEventName(0), createHandler(0)),
+      foo.on(getEventName(1), createHandler(1)),
+      foo.once(getEventName(2), createHandler(2)),
+      foo.on({
+        [getEventName(3)]: createHandler(3),
+        [getEventName(4)]: createHandler(4),
+      }),
+      foo.once({
+        [getEventName(5)]: createHandler(5),
+        [getEventName(6)]: createHandler(6),
+      })
+    ];
+  }
+  var disposers = [];
+  var fireAll = function () {
+    fired.forEach(function (__, index) {
+      foo.fire(getEventName(index));
     });
+  }
+  var dispose = function () {
+    disposers.forEach(function (disposer) {
+      disposer();
+    });
+  }
 
-  foo.fire('event2').fire('event1');
+  //  dispose before firing
+  disposers = attach();
+  dispose();
+  fireAll();
+  assert.deepEqual(fired, new Array(fired.length).fill(false));
 
-  assert.equal(event1Fired, true);
-  assert.equal(event2Fired, true);
+  //  dispose after firing
+  disposers = attach();
+  fireAll();
+  assert.deepEqual(fired, new Array(fired.length).fill(true));
+  fired = new Array(fired.length).fill(false);
+  dispose();
+  fireAll();
+  assert.deepEqual(fired, new Array(fired.length).fill(false));
 
-  event1Fired = false;
-  event2Fired = false;
-
-  foo.off('event1').off('event2');
-  foo.fire('event2').fire('event1');
-
-  assert.equal(event1Fired, false);
-  assert.equal(event2Fired, false);
 });

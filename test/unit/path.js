@@ -56,6 +56,14 @@
     getPathObject('M 100 100 L 300 100 L 200 300 z', callback);
   }
 
+  function updatePath(pathObject, value, preservePosition) {
+    const { left, top } = pathObject;
+    pathObject._setPath(value);
+    if (preservePosition) {
+      pathObject.set({ left, top });
+    }
+  }
+
   QUnit.module('fabric.Path', {
     beforeEach: function() {
       fabric.Object.__uid = 0;
@@ -113,6 +121,27 @@
     assert.equal(path.left, 150);
     assert.equal(path.top, 150);
     done();
+  });
+
+  QUnit.test('set path after initialization', function (assert) {
+    var done = assert.async();
+    var path = new fabric.Path('M 100 100 L 200 100 L 170 200 z', REFERENCE_PATH_OBJECT);
+    updatePath(path, REFERENCE_PATH_OBJECT.path, true);
+    assert.deepEqual(path.toObject(), REFERENCE_PATH_OBJECT);
+    updatePath(path, REFERENCE_PATH_OBJECT.path, false);
+    var left = path.left;
+    var top = path.top;
+    path.center();
+    assert.equal(left, path.left);
+    assert.equal(top, path.top);
+    var opts = fabric.util.object.clone(REFERENCE_PATH_OBJECT);
+    delete opts.path;
+    path.set(opts);
+    updatePath(path, 'M 100 100 L 300 100 L 200 300 z', true);
+    makePathObject(function (cleanPath) {
+      assert.deepEqual(path.toObject(), cleanPath.toObject());
+      done();
+    });
   });
 
   QUnit.test('toString', function(assert) {
@@ -182,7 +211,7 @@
   QUnit.test('path array not shared when cloned', function(assert) {
     var done = assert.async();
     makePathObject(function(originalPath) {
-      originalPath.clone(function(clonedPath) {
+      originalPath.clone().then(function(clonedPath) {
         clonedPath.path[0][1] = 200;
         assert.equal(originalPath.path[0][1], 100);
         done();
@@ -223,7 +252,7 @@
   QUnit.test('fromObject', function(assert) {
     var done = assert.async();
     assert.ok(typeof fabric.Path.fromObject === 'function');
-    fabric.Path.fromObject(REFERENCE_PATH_OBJECT, function(path) {
+    fabric.Path.fromObject(REFERENCE_PATH_OBJECT).then(function(path) {
       assert.ok(path instanceof fabric.Path);
       assert.deepEqual(path.toObject(), REFERENCE_PATH_OBJECT);
       done();
@@ -233,7 +262,7 @@
   QUnit.test('fromObject with sourcePath', function(assert) {
     var done = assert.async();
     assert.ok(typeof fabric.Path.fromObject === 'function');
-    fabric.Path.fromObject(REFERENCE_PATH_OBJECT, function(path) {
+    fabric.Path.fromObject(REFERENCE_PATH_OBJECT).then(function(path) {
       assert.ok(path instanceof fabric.Path);
       assert.deepEqual(path.toObject(), REFERENCE_PATH_OBJECT);
       done();
