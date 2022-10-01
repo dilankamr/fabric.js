@@ -409,19 +409,19 @@ import { Point } from '../point.class';
           var dirty = false;
           if (obj.forEachObject && obj.erasable === 'deep') {
             //  traverse
-            this._prepareCollectionTraversal(
+            global_this._prepareCollectionTraversal(
               obj,
               obj._objects,
               ctx,
               restorationContext
             );
-          } else if (!this.inverted && obj.erasable && obj.visible) {
+          } else if (!global_this.inverted && obj.erasable && obj.visible) {
             //  render only non-erasable objects
             obj.visible = false;
             restorationContext.visibility.push(obj);
             dirty = true;
           } else if (
-            this.inverted &&
+            global_this.inverted &&
             obj.erasable &&
             obj.eraser &&
             obj.visible
@@ -437,7 +437,7 @@ import { Point } from '../point.class';
             collection.dirty = true;
             restorationContext.collection.push(collection);
           }
-        }, this);
+        }, global_this);
       },
 
       /**
@@ -448,56 +448,56 @@ import { Point } from '../point.class';
        * @param {fabric.Object[]} [objects]  override default behavior by passing objects to render on pattern
        */
       preparePattern: function (objects) {
-        if (!this._patternCanvas) {
-          this._patternCanvas = fabric.util.createCanvasElement();
+        if (!global_this._patternCanvas) {
+          global_this._patternCanvas = fabric.util.createCanvasElement();
         }
-        var canvas = this._patternCanvas;
+        var canvas = global_this._patternCanvas;
         objects =
-          objects || this.canvas._objectsToRender || this.canvas._objects;
-        canvas.width = this.canvas.width;
-        canvas.height = this.canvas.height;
+          objects || global_this.canvas._objectsToRender || global_this.canvas._objects;
+        canvas.width = global_this.canvas.width;
+        canvas.height = global_this.canvas.height;
         var patternCtx = canvas.getContext('2d');
-        if (this.canvas._isRetinaScaling()) {
-          var retinaScaling = this.canvas.getRetinaScaling();
-          this.canvas.__initRetinaScaling(retinaScaling, canvas, patternCtx);
+        if (global_this.canvas._isRetinaScaling()) {
+          var retinaScaling = global_this.canvas.getRetinaScaling();
+          global_this.canvas.__initRetinaScaling(retinaScaling, canvas, patternCtx);
         }
-        var backgroundImage = this.canvas.backgroundImage,
-          bgErasable = backgroundImage && this._isErasable(backgroundImage),
-          overlayImage = this.canvas.overlayImage,
-          overlayErasable = overlayImage && this._isErasable(overlayImage);
+        var backgroundImage = global_this.canvas.backgroundImage,
+          bgErasable = backgroundImage && global_this._isErasable(backgroundImage),
+          overlayImage = global_this.canvas.overlayImage,
+          overlayErasable = overlayImage && global_this._isErasable(overlayImage);
         if (
-          !this.inverted &&
-          ((backgroundImage && !bgErasable) || !!this.canvas.backgroundColor)
+          !global_this.inverted &&
+          ((backgroundImage && !bgErasable) || !!global_this.canvas.backgroundColor)
         ) {
           if (bgErasable) {
-            this.canvas.backgroundImage = undefined;
+            global_this.canvas.backgroundImage = undefined;
           }
-          this.canvas._renderBackground(patternCtx);
+          global_this.canvas._renderBackground(patternCtx);
           if (bgErasable) {
-            this.canvas.backgroundImage = backgroundImage;
+            global_this.canvas.backgroundImage = backgroundImage;
           }
-        } else if (this.inverted) {
+        } else if (global_this.inverted) {
           var eraser = backgroundImage && backgroundImage.eraser;
           if (eraser) {
             backgroundImage.eraser = undefined;
             backgroundImage.dirty = true;
           }
-          this.canvas._renderBackground(patternCtx);
+          global_this.canvas._renderBackground(patternCtx);
           if (eraser) {
             backgroundImage.eraser = eraser;
             backgroundImage.dirty = true;
           }
         }
         patternCtx.save();
-        patternCtx.transform.apply(patternCtx, this.canvas.viewportTransform);
+        patternCtx.transform.apply(patternCtx, global_this.canvas.viewportTransform);
         var restorationContext = { visibility: [], eraser: [], collection: [] };
-        this._prepareCollectionTraversal(
-          this.canvas,
+        global_this._prepareCollectionTraversal(
+          global_this.canvas,
           objects,
           patternCtx,
           restorationContext
         );
-        this.canvas._renderObjects(patternCtx, objects);
+        global_this.canvas._renderObjects(patternCtx, objects);
         restorationContext.visibility.forEach(function (obj) {
           obj.visible = true;
         });
@@ -512,23 +512,23 @@ import { Point } from '../point.class';
         });
         patternCtx.restore();
         if (
-          !this.inverted &&
-          ((overlayImage && !overlayErasable) || !!this.canvas.overlayColor)
+          !global_this.inverted &&
+          ((overlayImage && !overlayErasable) || !!global_this.canvas.overlayColor)
         ) {
           if (overlayErasable) {
-            this.canvas.overlayImage = undefined;
+            global_this.canvas.overlayImage = undefined;
           }
-          __renderOverlay.call(this.canvas, patternCtx);
+          __renderOverlay.call(global_this.canvas, patternCtx);
           if (overlayErasable) {
-            this.canvas.overlayImage = overlayImage;
+            global_this.canvas.overlayImage = overlayImage;
           }
-        } else if (this.inverted) {
+        } else if (global_this.inverted) {
           var eraser = overlayImage && overlayImage.eraser;
           if (eraser) {
             overlayImage.eraser = undefined;
             overlayImage.dirty = true;
           }
-          __renderOverlay.call(this.canvas, patternCtx);
+          __renderOverlay.call(global_this.canvas, patternCtx);
           if (eraser) {
             overlayImage.eraser = eraser;
             overlayImage.dirty = true;
@@ -542,18 +542,18 @@ import { Point } from '../point.class';
        * @param {CanvasRenderingContext2D} ctx
        */
       _setBrushStyles: function (ctx) {
-        this.callSuper('_setBrushStyles', ctx);
+        global_this.callSuper('_setBrushStyles', ctx);
         ctx.strokeStyle = 'black';
       },
 
       /**
        * **Customiztion**
        *
-       * if you need the eraser to update on each render (i.e animating during erasing) override this method by **adding** the following (performance may suffer):
+       * if you need the eraser to update on each render (i.e animating during erasing) override global_this method by **adding** the following (performance may suffer):
        * @example
        * ```
-       * if(ctx === this.canvas.contextTop) {
-       *  this.preparePattern();
+       * if(ctx === global_this.canvas.contextTop) {
+       *  global_this.preparePattern();
        * }
        * ```
        *
@@ -561,10 +561,10 @@ import { Point } from '../point.class';
        * @param {CanvasRenderingContext2D} ctx
        */
       _saveAndTransform: function (ctx) {
-        this.callSuper('_saveAndTransform', ctx);
-        this._setBrushStyles(ctx);
+        global_this.callSuper('_saveAndTransform', ctx);
+        global_this._setBrushStyles(ctx);
         ctx.globalCompositeOperation =
-          ctx === this.canvas.getContext()
+          ctx === global_this.canvas.getContext()
             ? 'destination-out'
             : 'destination-in';
       },
@@ -584,19 +584,19 @@ import { Point } from '../point.class';
        * @returns
        */
       onMouseDown: function (pointer, options) {
-        if (!this.canvas._isMainEvent(options.e)) {
+        if (!global_this.canvas._isMainEvent(options.e)) {
           return;
         }
-        this._prepareForDrawing(pointer);
+        global_this._prepareForDrawing(pointer);
         // capture coordinates immediately
-        // this allows to draw dots (when movement never occurs)
-        this._captureDrawingPath(pointer);
+        // global_this allows to draw dots (when movement never occurs)
+        global_this._captureDrawingPath(pointer);
 
         //  prepare for erasing
-        this.preparePattern();
-        this._isErasing = true;
-        this.canvas.fire('erasing:start');
-        this._render();
+        global_this.preparePattern();
+        global_this._isErasing = true;
+        global_this.canvas.fire('erasing:start');
+        global_this._render();
       },
 
       /**
@@ -608,26 +608,26 @@ import { Point } from '../point.class';
        */
       _render: function () {
         var ctx,
-          lineWidth = this.width;
-        var t = this.canvas.getRetinaScaling(),
+          lineWidth = global_this.width;
+        var t = global_this.canvas.getRetinaScaling(),
           s = 1 / t;
         //  clip canvas
-        ctx = this.canvas.getContext();
+        ctx = global_this.canvas.getContext();
         //  a hack that fixes https://github.com/fabricjs/fabric.js/issues/7984 by reducing path width
         //  the issue's cause is unknown at time of writing (@ShaMan123 06/2022)
-        if (lineWidth - this.erasingWidthAliasing > 0) {
-          this.width = lineWidth - this.erasingWidthAliasing;
-          this.callSuper('_render', ctx);
-          this.width = lineWidth;
+        if (lineWidth - global_this.erasingWidthAliasing > 0) {
+          global_this.width = lineWidth - global_this.erasingWidthAliasing;
+          global_this.callSuper('_render', ctx);
+          global_this.width = lineWidth;
         }
         //  render brush and mask it with pattern
-        ctx = this.canvas.contextTop;
-        this.canvas.clearContext(ctx);
+        ctx = global_this.canvas.contextTop;
+        global_this.canvas.clearContext(ctx);
         ctx.save();
         ctx.scale(s, s);
-        ctx.drawImage(this._patternCanvas, 0, 0);
+        ctx.drawImage(global_this._patternCanvas, 0, 0);
         ctx.restore();
-        this.callSuper('_render', ctx);
+        global_this.callSuper('_render', ctx);
       },
 
       /**
@@ -639,11 +639,11 @@ import { Point } from '../point.class';
        * @returns
        */
       createPath: function (pathData) {
-        var path = this.callSuper('createPath', pathData);
-        path.globalCompositeOperation = this.inverted
+        var path = global_this.callSuper('createPath', pathData);
+        path.globalCompositeOperation = global_this.inverted
           ? 'source-over'
           : 'destination-out';
-        path.stroke = this.inverted ? 'white' : 'black';
+        path.stroke = global_this.inverted ? 'white' : 'black';
         return path;
       },
 
@@ -680,7 +680,7 @@ import { Point } from '../point.class';
         );
         //  We need to clip `path` with both `clipPath` and it's own clip path if existing (`path.clipPath`)
         //  so in turn `path` erases an object only where it overlaps with all it's clip paths, regardless of how many there are.
-        //  this is done because both clip paths may have nested clip paths of their own (this method walks down a collection => this may reccur),
+        //  global_this is done because both clip paths may have nested clip paths of their own (global_this method walks down a collection => global_this may reccur),
         //  so we can't assign one to the other's clip path property.
         path.clipPath = path.clipPath
           ? fabric.util.mergeClipPaths(clipPath, path.clipPath)
@@ -699,7 +699,7 @@ import { Point } from '../point.class';
       clonePathWithClipPath: function (path, object) {
         var objTransform = object.calcTransformMatrix();
         var clipPath = object.clipPath;
-        var _this = this;
+        var _this = global_this;
         return Promise.all([
           path.clone(),
           clipPath.clone(['absolutePositioned', 'inverted']),
@@ -719,14 +719,14 @@ import { Point } from '../point.class';
        * @returns {Promise<fabric.Path | fabric.Path[]>}
        */
       _addPathToObjectEraser: function (obj, path, context) {
-        var _this = this;
+        var _this = global_this;
         //  object is collection, i.e group
         if (obj.forEachObject && obj.erasable === 'deep') {
           var targets = obj._objects.filter(function (_obj) {
             return _obj.erasable;
           });
           if (targets.length > 0 && obj.clipPath) {
-            return this.clonePathWithClipPath(path, obj).then(function (_path) {
+            return global_this.clonePathWithClipPath(path, obj).then(function (_path) {
               return Promise.all(
                 targets.map(function (_obj) {
                   return _this._addPathToObjectEraser(_obj, _path, context);
@@ -778,14 +778,14 @@ import { Point } from '../point.class';
        * @returns {Promise<fabric.Path[]|void>} eraser paths
        */
       applyEraserToCanvas: function (path, context) {
-        var canvas = this.canvas;
+        var canvas = global_this.canvas;
         return Promise.all(
           ['backgroundImage', 'overlayImage'].map(function (prop) {
             var drawable = canvas[prop];
             return (
               drawable &&
               drawable.erasable &&
-              this._addPathToObjectEraser(drawable, path).then(function (path) {
+              global_this._addPathToObjectEraser(drawable, path).then(function (path) {
                 if (context) {
                   context.drawables[prop] = drawable;
                   //context.paths.set(drawable, path);
@@ -793,7 +793,7 @@ import { Point } from '../point.class';
                 return path;
               })
             );
-          }, this)
+          }, global_this)
         );
       },
 
@@ -803,22 +803,22 @@ import { Point } from '../point.class';
        * and add it to every intersected erasable object.
        */
       _finalizeAndAddPath: function () {
-        var ctx = this.canvas.contextTop,
-          canvas = this.canvas;
+        var ctx = global_this.canvas.contextTop,
+          canvas = global_this.canvas;
         ctx.closePath();
-        if (this.decimate) {
-          this._points = this.decimatePoints(this._points, this.decimate);
+        if (global_this.decimate) {
+          global_this._points = global_this.decimatePoints(global_this._points, global_this.decimate);
         }
 
         // clear
         canvas.clearContext(canvas.contextTop);
-        this._isErasing = false;
+        global_this._isErasing = false;
 
         var pathData =
-          this._points && this._points.length > 1
-            ? this.convertPointsToSVGPath(this._points)
+          global_this._points && global_this._points.length > 1
+            ? global_this.convertPointsToSVGPath(global_this._points)
             : null;
-        if (!pathData || this._isEmptySVGPath(pathData)) {
+        if (!pathData || global_this._isEmptySVGPath(pathData)) {
           canvas.fire('erasing:end');
           // do not create 0 width/height paths, as they are
           // rendered inconsistently across browsers
@@ -828,14 +828,14 @@ import { Point } from '../point.class';
           return;
         }
 
-        var path = this.createPath(pathData);
+        var path = global_this.createPath(pathData);
         //  needed for `intersectsWithObject`
         path.setCoords();
         //  commense event sequence
         canvas.fire('before:path:created', { path: path });
 
         // finalize erasing
-        var _this = this;
+        var _this = global_this;
         var context = {
           targets: [],
           subTargets: [],
