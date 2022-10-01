@@ -1,26 +1,30 @@
 import { terser } from 'rollup-plugin-terser';
-import ts from "rollup-plugin-ts";
+import ts from 'rollup-plugin-ts';
+import json from '@rollup/plugin-json';
 
-// rollup.config.js
+// https://rollupjs.org/guide/en/#configuration-files
 export default {
-  input: ['./index.js'],
+  input: process.env.BUILD_INPUT?.split(',') || ['./index.js'],
   output: [
     {
-        file: process.env.BUILD_DESTINATION || './dist/fabric.js',
-        name: 'fabric',
-        format: 'cjs',
+      file: process.env.BUILD_OUTPUT || './dist/fabric.js',
+      name: 'fabric',
+      format: 'cjs',
+      sourcemap: true,
     },
-    Number(process.env.MINIFY) ?
-      {
-        file: process.env.MIN_BUILD_DESTINATION || './dist/fabric.min.js',
-        format: 'cjs',
-        name: 'fabric',
-        plugins: [terser()],
-      } : null,
+    Number(process.env.MINIFY)
+      ? {
+          file: process.env.BUILD_MIN_OUTPUT || './dist/fabric.min.js',
+          name: 'fabric',
+          format: 'cjs',
+          plugins: [terser()],
+        }
+      : null,
   ],
   plugins: [
-		ts({
-			/* Plugin options */
-		})
-	]
+    json(),
+    ts({
+      /* Plugin options */
+    }),
+  ],
 };
