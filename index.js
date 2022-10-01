@@ -93,8 +93,8 @@ import './src/mixins/itext_key_behavior.mixin'; // optional itext
 import './src/mixins/itext.svg_export'; // optional itext
 import './src/shapes/textbox.class'; // optional textbox
 import './src/mixins/default_controls'; // optional interaction
-//  extends fabric.StaticCanvas, fabric.Canvas, fabric.Object, depends on fabric.PencilBrush and fabric.Rect
-// import './src/mixins/eraser_brush.mixin'; // optional erasing
+import './src/mixins/eraser_brush.mixin'; // optional erasing
+
 if (typeof exports !== 'undefined') {
   exports.fabric = fabric;
 }
