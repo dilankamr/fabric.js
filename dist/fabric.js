@@ -1,4 +1,4 @@
-/* build: `node build.js modules=ALL minifier=uglifyjs` */
+/* build: `node build.js modules=ALL exclude=node minifier=uglifyjs` */
 /*! Fabric.js Copyright 2008-2015, Printio (Juriy Zaytsev, Maxim Chernyak) */
 
 var fabric = fabric || { version: '5.2.4' };
@@ -19,23 +19,6 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
   }
   fabric.window = window;
 }
-else {
-  // assume we're running under node.js when document/window are not present
-  var jsdom = require('jsdom');
-  var virtualWindow = new jsdom.JSDOM(
-    decodeURIComponent('%3C!DOCTYPE%20html%3E%3Chtml%3E%3Chead%3E%3C%2Fhead%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'),
-    {
-      features: {
-        FetchExternalResources: ['img']
-      },
-      resources: 'usable'
-    }).window;
-  fabric.document = virtualWindow.document;
-  fabric.jsdomImplForWrapper = require('jsdom/lib/jsdom/living/generated/utils').implForWrapper;
-  fabric.nodeCanvas = require('jsdom/lib/jsdom/utils').Canvas;
-  fabric.window = virtualWindow;
-  DOMParser = fabric.window.DOMParser;
-}
 
 /**
  * True when in environment that supports touch events
@@ -48,8 +31,7 @@ fabric.isTouchSupported = 'ontouchstart' in fabric.window || 'ontouchstart' in f
  * True when in environment that's probably Node.js
  * @type boolean
  */
-fabric.isLikelyNode = typeof Buffer !== 'undefined' &&
-                      typeof window === 'undefined';
+fabric.isLikelyNode = typeof Buffer !== 'undefined' && typeof window === 'undefined';
 
 /* _FROM_SVG_START_ */
 /**
@@ -3823,6 +3805,7 @@ fabric.CommonMethods = {
               prevStyle.fontFamily !== thisStyle.fontFamily ||
               prevStyle.fontWeight !== thisStyle.fontWeight ||
               prevStyle.fontStyle !== thisStyle.fontStyle ||
+              prevStyle.textBackgroundColor !== thisStyle.textBackgroundColor ||
               prevStyle.deltaY !== thisStyle.deltaY) ||
               (forTextSpans &&
                 (prevStyle.overline !== thisStyle.overline ||
@@ -3856,7 +3839,7 @@ fabric.CommonMethods = {
           charIndex++;
           var thisStyle = styles[i][c];
           //check if style exists for this character
-          if (thisStyle) {
+          if (thisStyle && Object.keys(thisStyle).length > 0) {
             var styleChanged = fabric.util.hasStyleChanged(prevStyle, thisStyle, true);
             if (styleChanged) {
               stylesArray.push({
