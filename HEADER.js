@@ -173,7 +173,7 @@ fabric.cachesBoundsOfCurve = true;
  * @type Boolean
  * @default false
  */
-fabric.forceGLPutImageData = false;
+fabric.forceGLPutImageData = true;
 
 fabric.initFilterBackend = function() {
   if (fabric.enableGLFiltering && fabric.isWebglSupported && fabric.isWebglSupported(fabric.textureSize)) {

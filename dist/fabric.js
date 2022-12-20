@@ -1,4 +1,4 @@
-/* build: `node build.js modules=ALL exclude=node minifier=uglifyjs` */
+/* build: `node build.js modules=ALL minifier=uglifyjs` */
 /*! Fabric.js Copyright 2008-2015, Printio (Juriy Zaytsev, Maxim Chernyak) */
 
 var fabric = fabric || { version: '5.2.4' };
@@ -31,7 +31,8 @@ fabric.isTouchSupported = 'ontouchstart' in fabric.window || 'ontouchstart' in f
  * True when in environment that's probably Node.js
  * @type boolean
  */
-fabric.isLikelyNode = typeof Buffer !== 'undefined' && typeof window === 'undefined';
+fabric.isLikelyNode = typeof Buffer !== 'undefined' &&
+                      typeof window === 'undefined';
 
 /* _FROM_SVG_START_ */
 /**
@@ -173,7 +174,7 @@ fabric.cachesBoundsOfCurve = true;
  * @type Boolean
  * @default false
  */
-fabric.forceGLPutImageData = false;
+fabric.forceGLPutImageData = true;
 
 fabric.initFilterBackend = function() {
   if (fabric.enableGLFiltering && fabric.isWebglSupported && fabric.isWebglSupported(fabric.textureSize)) {
